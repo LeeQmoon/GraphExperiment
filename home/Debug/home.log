@@ -1,0 +1,5 @@
+﻿  main.cpp
+c:\users\fullmoon\source\repos\home\home\camera.h(28): warning C4305: “=”: 从“double”到“float”截断
+c:\users\fullmoon\source\repos\home\home\main.cpp(129): warning C4305: “参数”: 从“double”到“GLfloat”截断
+c:\users\fullmoon\source\repos\home\home\main.cpp(244): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+  home.vcxproj -> C:\Users\Fullmoon\source\repos\home\Debug\home.exe
