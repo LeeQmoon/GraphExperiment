@@ -36,7 +36,7 @@ void Object::seTexture(const char *path) {
 	//纹素比像素小时，加权平均
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	//大时
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//加载数据
 	stbi_set_flip_vertically_on_load(true);//反转y值
 	int width, height, channels;

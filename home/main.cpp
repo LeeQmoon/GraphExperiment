@@ -64,17 +64,13 @@ int main() {
 	glfwSetMouseButtonCallback(window, mouseButtonCallBack);
 	glViewport(0, 0, width, height);
 
-	vector<Object>objects(4);//4个对象
+	vector<Object>objects(2);//4个对象
 	readData(objects);//以传引用的方式传入，获取数据
 	objects[0].setBufferAndVertexArray();
-	objects[0].seTexture("texture/bottom.jpg");
+	objects[0].seTexture("texture/timg.jpg");
 	objects[1].setBufferAndVertexArray();
-	objects[1].seTexture("texture/brick.jpg");
-	objects[2].setBufferAndVertexArray();
-	objects[2].seTexture("texture/roof.jpg");
-	objects[3].setBufferAndVertexArray();
-	objects[3].seTexture("texture/roof.jpg");
-
+	objects[1].seTexture("texture/t.jpg");
+	
 	int vertexshader, fragmentshader;
 	int shaderprogram;
 	int success;
@@ -86,7 +82,7 @@ int main() {
 	glDeleteShader(vertexshader);
 	glDeleteShader(fragmentshader);
 
-	model = glm::translate(model, glm::vec3(-0.1, -0.5, 0.1));
+	model = glm::translate(model, glm::vec3(-0.1, -0.5, -5.0));
 	model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
 	GLuint modelId = glGetUniformLocation(shaderprogram, "model");
 
@@ -122,7 +118,7 @@ void frameBufferSizeCallBack(GLFWwindow *window, int width, int height) {
 }
 
 void readData(vector<Object> &objects) {//question:读取的时候字符流缓存的问题
-	ifstream flie("C:/Users/Fullmoon/Desktop/texModel.obj", std::ifstream::in);//只读打开
+	ifstream flie("C:/Users/Fullmoon/Desktop/hehhe.obj", std::ifstream::in);//只读打开
 	vector<Point>pointsTemp;//中间数组
 	vector<Texture>texTemp;//中间数组
 	Point point;
@@ -137,33 +133,19 @@ void readData(vector<Object> &objects) {//question:读取的时候字符流缓存的问题
 	if (flie.is_open()) {
 		while (getline(flie, str)) {//逐行读取
 			stringstream ss;
-			if (str.find("Box1") != string::npos) {
+			if (str.find("House") != string::npos) {
 				//checkFirst = ((checkFirst == 2) ? 0 : checkFirst++);
-				if (checkFirst == 2)
+				if (checkFirst == 3)
 					checkFirst = 0;
 				else checkFirst++;
 				if (checkFirst == 1)
 					flag++;
 			}
-			if (str.find("Box2") != string::npos) {
-				if (checkFirst == 2)
+			if (str.find("Roof") != string::npos) {
+				if (checkFirst == 3)
 					checkFirst = 0;
 				else checkFirst++;
 				if(checkFirst == 1)
-					flag++;
-			}
-			if (str.find("Object1") != string::npos) {
-				if (checkFirst == 2)
-					checkFirst = 0;
-				else checkFirst++;
-				if (checkFirst == 1)
-					flag++;
-			}
-			if (str.find("Object2") != string::npos && (!checkFirst)) {
-				if (checkFirst == 2)
-					checkFirst = 0;
-				else checkFirst++;
-				if (checkFirst == 1)
 					flag++;
 			}
 
