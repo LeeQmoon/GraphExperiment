@@ -31,7 +31,7 @@ const char *vertex_shader = &temp;//不能初始化为空指针，会出现访问异常
 const char *fragment_shader = &temp;
 
 void frameBufferSizeCallBack(GLFWwindow *window, int width, int height);//帧缓冲回调
-void readData(vector<Object> &objects);//读取obj文件
+void readData(vector<Object> &objects,const char *objPath);//读取obj文件
 void readShaderSource();//读取shader文档
 void checkShader(string type, int &object, int *success, char *info);//生成shader
 void checkShaderProgram(int &shaderprogram, int &vertexshader, int &fragmentshader, int *success, char *info);
@@ -65,7 +65,8 @@ int main() {
 	glViewport(0, 0, width, height);
 
 	vector<Object>objects(2);//4个对象
-	readData(objects);//以传引用的方式传入，获取数据
+	const char *objPath = "C:/Users/Fullmoon/Desktop/hehhe.obj";
+	readData(objects, objPath);//以传引用的方式传入，获取数据
 	objects[0].setBufferAndVertexArray();
 	objects[0].seTexture("texture/LogWall_A.tga");
 	objects[1].setBufferAndVertexArray();
@@ -117,8 +118,8 @@ void frameBufferSizeCallBack(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void readData(vector<Object> &objects) {//question:读取的时候字符流缓存的问题
-	ifstream flie("C:/Users/Fullmoon/Desktop/hehhe.obj", std::ifstream::in);//只读打开
+void readData(vector<Object> &objects, const char *objPath) {//question:读取的时候字符流缓存的问题
+	ifstream flie(objPath, std::ifstream::in);//只读打开
 	vector<Point>pointsTemp;//中间数组
 	vector<Texture>texTemp;//中间数组
 	Point point;
@@ -126,28 +127,14 @@ void readData(vector<Object> &objects) {//question:读取的时候字符流缓存的问题
 	string str;
 	char ch;//读取/
 	int flag = -1;//标志目前读取的对象
-	int checkFirst = 0;//检测Box1这些字符串只能出现一次，若是第二次出现则置为false
 	int OneTemp,twoTemp;//索引边读取边处理
 
 	//先判断文件是否已经打开了
 	if (flie.is_open()) {
 		while (getline(flie, str)) {//逐行读取
 			stringstream ss;
-			if (str.find("House") != string::npos) {
-				//checkFirst = ((checkFirst == 2) ? 0 : checkFirst++);
-				if (checkFirst == 3)
-					checkFirst = 0;
-				else checkFirst++;
-				if (checkFirst == 1)
+			if (str.find("object") != string::npos)
 					flag++;
-			}
-			if (str.find("Roof") != string::npos) {
-				if (checkFirst == 3)
-					checkFirst = 0;
-				else checkFirst++;
-				if(checkFirst == 1)
-					flag++;
-			}
 
 			//图元索引
 			if (str.substr(0,1) == "f") {
