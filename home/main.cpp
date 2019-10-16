@@ -67,9 +67,9 @@ int main() {
 	vector<Object>objects(2);//4个对象
 	readData(objects);//以传引用的方式传入，获取数据
 	objects[0].setBufferAndVertexArray();
-	objects[0].seTexture("texture/timg.jpg");
+	objects[0].seTexture("texture/LogWall_A.tga");
 	objects[1].setBufferAndVertexArray();
-	objects[1].seTexture("texture/t.jpg");
+	objects[1].seTexture("texture/WallCuts_A.tga");
 	
 	int vertexshader, fragmentshader;
 	int shaderprogram;

@@ -16,8 +16,8 @@ void Object::setBufferAndVertexArray() {
 	glBufferData(GL_ARRAY_BUFFER, totalSize, NULL, GL_STATIC_DRAW);//创建足够大的缓冲区
 	glBufferSubData(GL_ARRAY_BUFFER, 0, verSize, &vertices[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, verSize, texSize, &texture_coords[0]);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(sizeof(Point)));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);//为何不是3* sizeof(float)
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(verSize));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 
@@ -31,10 +31,10 @@ void Object::seTexture(const char *path) {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);//生成纹理对象
 	//设置参数
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	//纹素比像素小时，加权平均
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//大时
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	//加载数据
@@ -60,8 +60,9 @@ void Object::deleteVBOAndVAOAndTexture() {
 }
 
 void Object::draw() {
-	glBindVertexArray(VAO);
 	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindVertexArray(VAO);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }
 
