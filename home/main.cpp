@@ -9,23 +9,10 @@
 #include<vector>
 #include<string>
 #include"Camera.h"
+#include"Object.h"
 #include<iomanip>
 using namespace std;
 
-struct point {
-	float x;
-	float y;
-	float z;
-};
-
-struct face {
-	int Ione;//索引一
-	int Itwo;//索引二
-	int Ithree;//索引三
-};
-
-using Point = struct point;
-using Face = struct face;
 const int width = 800;
 const int height = 600;
 Camera camera;
@@ -36,21 +23,21 @@ bool flag = false;//只有当鼠标左键按下的时候让模型自行旋转角度
 static float theta = 0.0;//改变的角度
 glm::mat4 model;//模型变换--->世界坐标系
 double xoff = 0.0;//左键按下用的
+string fstr;
+string vstr;
 
 const char temp = 'a';
 const char *vertex_shader = &temp;//不能初始化为空指针，会出现访问异常
 const char *fragment_shader = &temp;
-string fstr;
-string vstr;
 
 void frameBufferSizeCallBack(GLFWwindow *window, int width, int height);//帧缓冲回调
-void readData(vector<Point> &vertices, vector<Face> &faces);//读取obj文件
+void readData(vector<Object> &objects);//读取obj文件
 void readShaderSource();//读取shader文档
 void checkShader(string type, int &object, int *success, char *info);//生成shader
 void checkShaderProgram(int &shaderprogram, int &vertexshader, int &fragmentshader, int *success, char *info);
 void cursorCallBack(GLFWwindow *window, double xpos, double ypos);//鼠标光标变化
 void scrollCallBack(GLFWwindow *window, double x, double yoffset);//滚轮变化
-void mouseButtonCallBack(GLFWwindow *window,int button,int action,int mod);//鼠标左键按着
+void mouseButtonCallBack(GLFWwindow *window, int button, int action, int mod);//鼠标左键按着
 void handleModel();//处理模型矩阵
 
 int main() {
@@ -75,25 +62,18 @@ int main() {
 	glfwSetCursorPosCallback(window, cursorCallBack);//当鼠标移动的时候，回调
 	glfwSetScrollCallback(window, scrollCallBack);
 	glfwSetMouseButtonCallback(window, mouseButtonCallBack);
-	glViewport(100, 100, width, height);
-	vector<Point>vertices;
-	vector<Face>indices;
-	readData(vertices, indices);//以传引用的方式传入，获取数据
+	glViewport(0, 0, width, height);
 
-	GLuint VBO, EBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glGenBuffers(1, &VBO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Point)*vertices.size(), &vertices[0], GL_STATIC_DRAW);
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Face)*indices.size(), &indices[0], GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
+	vector<Object>objects(4);//4个对象
+	readData(objects);//以传引用的方式传入，获取数据
+	objects[0].setBufferAndVertexArray();
+	objects[0].seTexture("texture/bottom.jpg");
+	objects[1].setBufferAndVertexArray();
+	objects[1].seTexture("texture/brick.jpg");
+	objects[2].setBufferAndVertexArray();
+	objects[2].seTexture("texture/roof.jpg");
+	objects[3].setBufferAndVertexArray();
+	objects[3].seTexture("texture/roof.jpg");
 
 	int vertexshader, fragmentshader;
 	int shaderprogram;
@@ -121,18 +101,17 @@ int main() {
 		glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionId, 1, GL_FALSE, glm::value_ptr(projection));
-		glBindVertexArray(VAO);
+		glClearColor(0.2, 0.3, 0.3, 1.0);//
+		glClear(GL_COLOR_BUFFER_BIT);//上面两列不可跟下面的VAO和shaderprogram调换顺序
 		glUseProgram(shaderprogram);
-		glClearColor(0.2, 0.3, 0.3, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawElements(GL_TRIANGLES, 3 * indices.size(), GL_UNSIGNED_INT, (void*)0);
+		for (int i = 0; i < objects.size(); i++) 
+			objects[i].draw();
 		glfwSwapBuffers(window);
 		glfwPollEvents();//轮询事件队列
 	}
 
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
+	for (int i = 0; i < objects.size(); i++) 
+		objects[i].deleteVBOAndVAOAndTexture();
 	glfwTerminate();
 	return 0;
 }
@@ -142,37 +121,82 @@ void frameBufferSizeCallBack(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-void readData(vector<Point> &vertices, vector<Face> &faces) {
-
-	ifstream flie("C:/Users/Fullmoon/Desktop/house.obj", std::ifstream::in);//只读打开
+void readData(vector<Object> &objects) {//question:读取的时候字符流缓存的问题
+	ifstream flie("C:/Users/Fullmoon/Desktop/texModel.obj", std::ifstream::in);//只读打开
+	vector<Point>pointsTemp;//中间数组
+	vector<Texture>texTemp;//中间数组
+	Point point;
+	Texture texture_coord;
 	string str;
-	stringstream ss;
+	char ch;//读取/
+	int flag = -1;//标志目前读取的对象
+	int checkFirst = 0;//检测Box1这些字符串只能出现一次，若是第二次出现则置为false
+	int OneTemp,twoTemp;//索引边读取边处理
 
 	//先判断文件是否已经打开了
 	if (flie.is_open()) {
 		while (getline(flie, str)) {//逐行读取
-			Point point;
-			Face face;
+			stringstream ss;
+			if (str.find("Box1") != string::npos) {
+				//checkFirst = ((checkFirst == 2) ? 0 : checkFirst++);
+				if (checkFirst == 2)
+					checkFirst = 0;
+				else checkFirst++;
+				if (checkFirst == 1)
+					flag++;
+			}
+			if (str.find("Box2") != string::npos) {
+				if (checkFirst == 2)
+					checkFirst = 0;
+				else checkFirst++;
+				if(checkFirst == 1)
+					flag++;
+			}
+			if (str.find("Object1") != string::npos) {
+				if (checkFirst == 2)
+					checkFirst = 0;
+				else checkFirst++;
+				if (checkFirst == 1)
+					flag++;
+			}
+			if (str.find("Object2") != string::npos && (!checkFirst)) {
+				if (checkFirst == 2)
+					checkFirst = 0;
+				else checkFirst++;
+				if (checkFirst == 1)
+					flag++;
+			}
 
 			//图元索引
-			if (str[0] == 'f') {
+			if (str.substr(0,1) == "f") {
 				ss.clear();//写入或者读出不一样的类型时，字符流要清空一次
 				ss << str;//把字符串写入流中，方便读取了类型
 				string temp;//主要是为了读取掉v/f
-				ss >> temp >> face.Ione >> face.Itwo >> face.Ithree;
-				face.Ione--;//文件索引比实际索引大1
-				face.Itwo--;
-				face.Ithree--;
-				faces.emplace_back(face);
+				ss >> temp >> OneTemp >> ch >> twoTemp;
+				objects[flag].vertices.emplace_back(pointsTemp[OneTemp - 1]);
+				objects[flag].texture_coords.emplace_back(texTemp[twoTemp - 1]);
+				ss >> OneTemp >> ch >> twoTemp;
+				objects[flag].vertices.emplace_back(pointsTemp[OneTemp - 1]);
+				objects[flag].texture_coords.emplace_back(texTemp[twoTemp - 1]);
+				ss >> OneTemp >> ch >> twoTemp;
+				objects[flag].vertices.emplace_back(pointsTemp[OneTemp - 1]);
+				objects[flag].texture_coords.emplace_back(texTemp[twoTemp - 1]);
 			}
 
 			//顶点数据
-			if (str[0] == 'v') {
+			if (str.substr(0,1) == "v" && str.substr(0, 2) != "vt") {
 				ss.clear();
 				ss << str;
 				string temp;
 				ss >> temp >> point.x >> point.y >> point.z;
-				vertices.emplace_back(point);
+				pointsTemp.emplace_back(point);
+			}
+			if (str.substr(0, 2) == "vt") {
+				ss.clear();
+				ss << str;
+				string temp;
+				ss >> temp >> texture_coord.s >> texture_coord.t;
+				texTemp.emplace_back(texture_coord);
 			}
 
 		}
@@ -186,6 +210,8 @@ void readShaderSource() {
 	fstream ffile("fragment.txt");
 	stringstream vss;
 	stringstream fss;
+	/*string fstr;
+	string vstr;*/
 
 	if (vfile.is_open()) {
 		vss << vfile.rdbuf();//把文件流缓冲区的内容输入到字符流中
@@ -253,7 +279,7 @@ void cursorCallBack(GLFWwindow *window, double xpos, double ypos) {
 	xoffset = xpos - last_xpos;
 	yoffset = last_ypos - ypos;//窗口坐标系y轴自上而下递增导致的
 	last_xpos = xpos;
-	last_ypos = ypos;   
+	last_ypos = ypos;
 	xoff = xoffset;
 	handleModel();
 	camera.mouseMovement(xoffset, yoffset);
