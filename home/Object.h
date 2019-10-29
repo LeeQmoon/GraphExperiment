@@ -13,7 +13,6 @@ struct texture {
 	float s;
 	float t;
 };
-
 using Point = struct point;
 using Texture = struct texture;
 

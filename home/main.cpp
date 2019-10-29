@@ -63,6 +63,7 @@ int main() {
 	glfwSetScrollCallback(window, scrollCallBack);
 	glfwSetMouseButtonCallback(window, mouseButtonCallBack);
 	glViewport(0, 0, width, height);
+	glEnable(GL_DEPTH_TEST);
 
 	vector<Object>objects(2);//4个对象
 	const char *objPath = "C:/Users/Fullmoon/Desktop/hehhe.obj";
@@ -99,7 +100,7 @@ int main() {
 		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionId, 1, GL_FALSE, glm::value_ptr(projection));
 		glClearColor(0.2, 0.3, 0.3, 1.0);//
-		glClear(GL_COLOR_BUFFER_BIT);//上面两列不可跟下面的VAO和shaderprogram调换顺序
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //上面两列不可跟下面的VAO和shaderprogram调换顺序
 		glUseProgram(shaderprogram);
 		for (int i = 0; i < objects.size(); i++) 
 			objects[i].draw();

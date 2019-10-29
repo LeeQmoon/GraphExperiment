@@ -7,17 +7,19 @@
 #include<iostream>
 using namespace std;
 
-void Camera::updateDirection() {
-	direction.x = cos(glm::radians(this->pitch))*cos(glm::radians(this->yaw));
-	direction.y = sin(glm::radians(pitch));//角度转弧度
-	direction.z = cos(glm::radians(this->pitch))*sin(glm::radians(this->yaw));
-	direction = glm::normalize(direction);//归一化
-}
-
-//观察矩阵
+//欧拉角实现，观察矩阵
 glm::mat4 Camera::getView() {
-	//摄像机始终看向一个方向
-	return glm::lookAt(position, position + direction,world_up);
+	glm::vec3 Row1 = { cos(glm::radians(yaw)),sin(glm::radians(yaw))*sin(glm::radians(pitch)),-sin(glm::radians(yaw))*cos(glm::radians(pitch)) };
+	glm::vec3 Row2 = { 0,cos(glm::radians(pitch)),sin(glm::radians(pitch)) };
+	glm::vec3 Row3 = { sin(glm::radians(yaw)),-cos(glm::radians(yaw))*sin(glm::radians(pitch)),cos(glm::radians(yaw))*cos(glm::radians(pitch)) };
+	glm::mat4 view(
+		glm::vec4(Row1,glm::dot(Row1,-position)),
+		glm::vec4(Row2,glm::dot(Row2,-position)),
+		glm::vec4(Row3,glm::dot(Row3,-position)),
+		glm::vec4(0,0,0,1)
+	);//这个就是点的旋转矩阵，由于glm行主序，那么得先转置
+	view = glm::transpose(view);
+	return view;
 }
 
 float Camera::getFov() {
@@ -25,17 +27,17 @@ float Camera::getFov() {
 }
 
 void Camera::mouseMovement(double xoffset, double yoffset) {
+	//鼠标往右走，就是摄像机往右看，鼠标往左走，就是摄像机往左看/
+	//鼠标往上走，摄像机抬头，鼠标往下走，摄像机低头
 	xoffset *= sensitivity;
 	yoffset *= sensitivity;
-	
 	pitch += yoffset;
-	yaw += xoffset;
-	//不能看天也不能看地
+	yaw -= xoffset;
+	//不能看天也不能看地，否则出现万向节死锁
 	if (pitch >= 89.0)
 		pitch = 89.0;
 	if (pitch <= -89.0)
 		pitch = -89.0;
-	updateDirection();
 }
 
 void Camera::scrollChange(double yoffset) {
