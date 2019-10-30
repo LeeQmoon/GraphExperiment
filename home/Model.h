@@ -1,27 +1,26 @@
 #pragma once
 #include"Object.h"
-#include<glm/glm.hpp>
-#include<glm/gtc/matrix_transform.hpp>
-#include<glm/gtc/type_ptr.hpp>
 #include<iostream>
 #include<vector>
 using namespace std;
 
-struct material {
-	glm::vec3 emission;
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-	float shininess;
-};
-
 class Model
 {
-private:
-	vector<Object>model;//一个模型由多个不一样的对象
 public:
-	Model() {}
-	void getObject(Object object);
-	~Model(){}
+	Object *objects;//一个模型由多个不一样的对象
+	string ObjPath;//OBJ文件路径
+	string matklu;//有一个材质库->此包含一个材质库路径
+	int size;//有几个对象组成
+	int maxsize;
+public:
+	Model() {
+		size = 0;
+	}
+	Model(const string &path);
+	void readObj();
+	void readMtl();
+	void processMaterial(Material *temp,int count);
+	void display();
+	~Model();
 };
 

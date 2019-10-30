@@ -13,7 +13,7 @@ private:
 	float pitch;//俯仰角
 	float sensitivity;//位移敏感度
 public:
-	Camera(glm::vec3 Position = glm::vec3(0.0,0.0,5.0)) {
+	Camera(glm::vec3 Position = glm::vec3(0.0,0.0,8.0)) {
 		position = Position;
 		fov = 45.0;
 		yaw = 0;//之所以为0，是因为位置的设置，使得两者初始时就重叠
