@@ -37,11 +37,12 @@ void checkShaderProgram(int &shaderprogram, int &vertexshader, int &fragmentshad
 void cursorCallBack(GLFWwindow *window, double xpos, double ypos);//鼠标光标变化
 void scrollCallBack(GLFWwindow *window, double x, double yoffset);//滚轮变化
 void mouseButtonCallBack(GLFWwindow *window, int button, int action, int mod);//鼠标左键按着
+void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, GLint mods);//键盘回调
 void handleModel();//处理模型矩阵
-// 整个项目搜索   ---log---  
-// 你值得拥有
-// 关键要细心，慢慢调试还是能找到问题所在
-// 我还遇到过更神奇的问题，淡定~~~~
+				   // 整个项目搜索   ---log---  
+				   // 你值得拥有
+				   // 关键要细心，慢慢调试还是能找到问题所在
+				   // 我还遇到过更神奇的问题，淡定~~~~
 int main() {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -64,14 +65,15 @@ int main() {
 	glfwSetCursorPosCallback(window, cursorCallBack);//当鼠标移动的时候，回调
 	glfwSetScrollCallback(window, scrollCallBack);
 	glfwSetMouseButtonCallback(window, mouseButtonCallBack);
+	glfwSetKeyCallback(window, key_callback);
 	glViewport(0, 0, width, height);
 	glEnable(GL_DEPTH_TEST);
 
 	Model modell("homework.obj");
 	modell.readObj();
 	/*for (int i = 0; i < modell.size; i++)
-		modell.objects[i].print();
-*/
+	modell.objects[i].print();
+	*/
 	int vertexshader, fragmentshader;
 	int shaderprogram;
 	int success;
@@ -89,6 +91,7 @@ int main() {
 
 	//渲染循环
 	while (!glfwWindowShouldClose(window)) {
+		camera.keyMovement();
 		glm::mat4 view = camera.getView();//观察矩阵
 		GLuint viewId = glGetUniformLocation(shaderprogram, "view");
 		//投影矩阵
@@ -206,3 +209,20 @@ void mouseButtonCallBack(GLFWwindow *window, int button, int action, int mod) {
 	}
 }
 
+
+//键盘回调
+void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, GLint mods)
+{
+
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	if (key >= 0 && key < 1024)
+	{
+		//设置按下/释放键为true或false
+		if (action == GLFW_PRESS)
+			camera.key_status[key] = true;
+		else if (action == GLFW_RELEASE)
+			camera.key_status[key] = false;
+	}
+
+}

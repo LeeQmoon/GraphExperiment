@@ -6,6 +6,10 @@
 #include<glm/gtc/type_ptr.hpp>
 #include<iostream>
 using namespace std;
+//不可把这部分放在camera.h中，出现重定义
+GLdouble currenttime = 0.0f;
+GLdouble lasttime = 0.0f;
+GLdouble deltatime = 0.0f;
 
 //欧拉角实现，观察矩阵
 glm::mat4 Camera::getView() {
@@ -18,8 +22,8 @@ glm::mat4 Camera::getView() {
 		glm::vec4(Row3,glm::dot(Row3,-position)),
 		glm::vec4(0,0,0,1)
 	);//这个就是点的旋转矩阵，由于glm行主序，那么得先转置
-	view = glm::transpose(view);
-	return view;
+	this->view = view;
+	return glm::transpose(view);
 }
 
 float Camera::getFov() {
@@ -47,4 +51,24 @@ void Camera::scrollChange(double yoffset) {
 		fov = 1.0;
 	if (fov >= 1.0 && fov <= 45.0)
 		fov += yoffset;
+}
+
+void Camera::keyMovement() {
+	currenttime = glfwGetTime();
+	deltatime = currenttime - lasttime;
+	lasttime = currenttime;//每帧的时间
+
+	//w --> 相机往z负方向走 即模型往z正方向走   A --> 相机往x负方向走 即模型往x正方向走
+	glm::vec3 Front = glm::normalize(view *glm::vec4(0.0, 0.0, -1.0, 0.0));//摄像机观察方向
+	glm::vec3 Right = glm::normalize(view *glm::vec4(1.0, 0.0, 0.0, 0.0));
+	GLfloat vary = movementSpeed * deltatime;
+
+	if (key_status[GLFW_KEY_W]) //GLFW_KEY_W
+		position += Front * vary;
+	if (key_status[GLFW_KEY_S])//GLFW_KEY_S
+		position -= Front * vary;
+	if (key_status[GLFW_KEY_A])//GLFW_KEY_A
+		position -= Right * vary;
+	if (key_status[GLFW_KEY_D])//GLFW_KEY_D
+		position += Right * vary;
 }

@@ -1,11 +1,3 @@
-﻿  Camera.cpp
-c:\users\fullmoon\source\repos\home\home\camera.h(21): warning C4305: “=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\camera.cpp(34): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
-c:\users\fullmoon\source\repos\home\home\camera.cpp(35): warning C4244: “-=”: 从“double”转换到“float”，可能丢失数据
-c:\users\fullmoon\source\repos\home\home\camera.cpp(49): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
-  main.cpp
-c:\users\fullmoon\source\repos\home\home\camera.h(21): warning C4305: “=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\main.cpp(101): warning C4305: “参数”: 从“double”到“GLfloat”截断
-c:\users\fullmoon\source\repos\home\home\main.cpp(174): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
-  正在生成代码...
+﻿  Object.cpp
+c:\users\fullmoon\source\repos\home\home\object.cpp(98): warning C4018: “<”: 有符号/无符号不匹配
   home.vcxproj -> C:\Users\Fullmoon\source\repos\home\Debug\home.exe

@@ -30,7 +30,8 @@ Object::Object(const Object &object) {
 void Object::setBufferAndVertexArray() {
 	verSize = sizeof(Point)*verSize;
 	texSize = sizeof(Texture)*texSize;
-	auto totalSize = verSize + texSize;
+	norSize = sizeof(Point)*norSize;
+	auto totalSize = verSize + texSize;//+ norSize;
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -39,10 +40,13 @@ void Object::setBufferAndVertexArray() {
 	glBufferData(GL_ARRAY_BUFFER, totalSize, NULL, GL_STATIC_DRAW);//创建足够大的缓冲区
 	glBufferSubData(GL_ARRAY_BUFFER, 0, verSize, &vertices[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, verSize, texSize, &texture_coords[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, verSize+texSize, norSize, &normal[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);//
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(verSize));
+	//glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(verSize+texSize));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
+	//glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -53,7 +57,7 @@ void Object::setBufferAndVertexArray() {
 void Object::seTexture() {
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);//生成纹理对象
-	//设置参数
+										  //设置参数
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 	//纹素比像素小时，加权平均
@@ -67,14 +71,14 @@ void Object::seTexture() {
 	unsigned char *data = stbi_load(material.map_Ka.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
 	if (data) {
 		//把纹素弄进GPU
-		glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);//多级渐远纹理
 	}
 	else {
 		cout << "Failed to load texture" << endl;
 	}
 	stbi_image_free(data);//释放数据
-	
+
 }
 
 void Object::deleteVBOAndVAOAndTexture() {
@@ -91,13 +95,13 @@ void Object::draw() {
 }
 
 void Object::print() {
-	for (int i = 0; i < verSize; i++) {
-		cout << vertices[i].x<<"  "<< vertices[i].y<<"  "<< vertices[i].z << endl;
+	for (int i = 0; i < norSize/sizeof(Point); i++) {
+		cout << normal[i].x << "  " << normal[i].y << "  " << normal[i].z << endl;
 	}
 	cout << "-------------------" << endl;
-	for (int i = 0; i < texSize; i++) {
-		cout << texture_coords[i].s << "  " << texture_coords[i].t<< endl;
-	}
+	//for (int i = 0; i < texSize; i++) {
+	//	cout << texture_coords[i].s << "  " << texture_coords[i].t << endl;
+	//}
 	/*cout << "versize: " << verSize << endl;
 	cout << "texsize: " << texSize << endl;
 	cout << "norsize: " << norSize << endl;
@@ -114,7 +118,7 @@ void Object::print() {
 }
 
 Object::~Object() {
-	delete []vertices;
-	delete []texture_coords;
-	delete []normal;
+	delete[]vertices;
+	delete[]texture_coords;
+	delete[]normal;
 }

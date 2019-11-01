@@ -56,7 +56,7 @@ void Model::readObj() {
 				//Object object;
 				ss >> temp;
 				//object.material.material_name = temp;//保存对象材质名
-			//	cout << "usemtl: "<<object.material.material_name << endl;
+				//	cout << "usemtl: "<<object.material.material_name << endl;
 				//this->objects[size++] = (object);
 				this->objects[size++].material.material_name = temp;
 				flag++;
@@ -77,13 +77,13 @@ void Model::readObj() {
 		}
 	}
 	//cout << v << "  " << t << "  " << n << endl;
-	
+
 	//v = t = n = 0;
 	//cout << v << "  " << t << "  " << n << endl;
 	/*for (int i = 0; i < size; i++) {
-		objects[i].verSize = v;
-		objects[i].texSize = t;
-		objects[i].norSize = n;
+	objects[i].verSize = v;
+	objects[i].texSize = t;
+	objects[i].norSize = n;
 	}*/
 	ffile.close();
 	readMtl();
@@ -154,12 +154,12 @@ void Model::readMtl() {
 		}
 	}
 	ffile.close();
-	processMaterial(materialTemp,mm);
+	processMaterial(materialTemp, mm);
 }
 
-void Model::processMaterial(Material *materialTemp,int count) {
+void Model::processMaterial(Material *materialTemp, int count) {
 	for (int i = 0; i < size; i++) {
-		for (int m = 0; m < count;m++) {
+		for (int m = 0; m < count; m++) {
 			if (materialTemp[m].material_name == objects[i].material.material_name) {
 				objects[i].material = materialTemp[m];//拷贝过来
 				break;
@@ -185,7 +185,7 @@ void Model::display() {
 	}
 }
 
-Model::~Model(){
+Model::~Model() {
 	for (int i = 0; i < size; i++) {
 		objects[i].deleteVBOAndVAOAndTexture();
 	}

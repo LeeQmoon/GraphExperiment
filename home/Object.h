@@ -26,7 +26,7 @@ struct material {
 	glm::vec3 Ka;//环境光反射系数
 	glm::vec3 Kd;//漫反射系数
 	glm::vec3 Ks;//镜面反射系数
-	//环境反射指定贴图
+				 //环境反射指定贴图
 	string map_Ka;
 	//漫反射指定贴图
 	string map_Kd;
@@ -37,7 +37,7 @@ using Material = struct material;
 
 class Object {
 public:
-	Point *vertices;
+	Point * vertices;
 	Texture *texture_coords;
 	Point *normal;
 	int verSize;
