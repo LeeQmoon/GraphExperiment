@@ -31,7 +31,7 @@ void Object::setBufferAndVertexArray() {
 	verSize = sizeof(Point)*verSize;
 	texSize = sizeof(Texture)*texSize;
 	norSize = sizeof(Point)*norSize;
-	auto totalSize = verSize + texSize;//+ norSize;
+	auto totalSize = verSize + texSize +norSize;
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -43,10 +43,10 @@ void Object::setBufferAndVertexArray() {
 	glBufferSubData(GL_ARRAY_BUFFER, verSize+texSize, norSize, &normal[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);//
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(verSize));
-	//glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(verSize+texSize));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(verSize+texSize));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-	//glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(2);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);

@@ -13,6 +13,17 @@
 #include<iomanip>
 using namespace std;
 
+struct Light {
+	glm::vec3 Ambient;
+	glm::vec3 LightColor;
+	glm::vec3 LightPosition;
+	float ConstantAttenuation;
+	float LinearAttenuation;
+	float QuadraticAttenuation;
+};
+struct Light light;
+
+
 const int width = 800;
 const int height = 600;
 Camera camera;
@@ -39,10 +50,10 @@ void scrollCallBack(GLFWwindow *window, double x, double yoffset);//滚轮变化
 void mouseButtonCallBack(GLFWwindow *window, int button, int action, int mod);//鼠标左键按着
 void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, GLint mods);//键盘回调
 void handleModel();//处理模型矩阵
-				   // 整个项目搜索   ---log---  
-				   // 你值得拥有
-				   // 关键要细心，慢慢调试还是能找到问题所在
-				   // 我还遇到过更神奇的问题，淡定~~~~
+void initLight();
+void processLight(GLuint shaderprogram);
+
+
 int main() {
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -74,6 +85,9 @@ int main() {
 	/*for (int i = 0; i < modell.size; i++)
 	modell.objects[i].print();
 	*/
+
+	initLight();//初始化光源参数
+
 	int vertexshader, fragmentshader;
 	int shaderprogram;
 	int success;
@@ -92,18 +106,19 @@ int main() {
 	//渲染循环
 	while (!glfwWindowShouldClose(window)) {
 		camera.keyMovement();
+		glClearColor(0.2, 0.3, 0.3, 1.0);//
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //
+		glUseProgram(shaderprogram);
+
 		glm::mat4 view = camera.getView();//观察矩阵
 		GLuint viewId = glGetUniformLocation(shaderprogram, "view");
 		//投影矩阵
 		glm::mat4 projection = glm::perspective(glm::radians(camera.getFov()), (float)width / (float)height, 0.1f, 100.0f);
 		GLuint projectionId = glGetUniformLocation(shaderprogram, "projection");
-
 		glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionId, 1, GL_FALSE, glm::value_ptr(projection));
-		glClearColor(0.2, 0.3, 0.3, 1.0);//
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //
-		glUseProgram(shaderprogram);
+		processLight(shaderprogram);//将光源信息传至shader
 		modell.display();  //   这个好像特别慢   -------------------------log----------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();//轮询事件队列
@@ -118,8 +133,8 @@ void frameBufferSizeCallBack(GLFWwindow *window, int width, int height) {
 }
 
 void readShaderSource() {
-	fstream vfile("vertex.txt");
-	fstream ffile("fragment.txt");
+	fstream vfile("vertex.vs");
+	fstream ffile("fragment.fs");
 	stringstream vss;
 	stringstream fss;
 
@@ -127,12 +142,16 @@ void readShaderSource() {
 		vss << vfile.rdbuf();//把文件流缓冲区的内容输入到字符流中
 		vstr = vss.str();
 		vertex_shader = vstr.c_str();//获得顶点着色器代码
+		for (int i = 0; i < vstr.size(); i++)
+			cout << vertex_shader[i];
 		vfile.close();
 	}
 	if (ffile.is_open()) {
 		fss << ffile.rdbuf();//把文件流的缓冲区内容弄到字符流
 		fstr = fss.str();//fstr把字符流中的字符串全部读出
 		fragment_shader = fstr.c_str();
+		for (int i = 0; i < fstr.size(); i++)
+			cout << fragment_shader[i];
 		ffile.close();
 	}
 
@@ -143,8 +162,9 @@ void checkShader(string type, int &object, int *success, char *info) {
 		object = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(object, 1, &vertex_shader, NULL);
 		glCompileShader(object);
+		
 		glGetShaderiv(object, GL_COMPILE_STATUS, success);
-		if (!success) {
+		if (!*success) {
 			glGetShaderInfoLog(object, 520, NULL, info);
 			cout << "VERTEXSHADER ERROR:" << info << endl;
 		}
@@ -154,7 +174,7 @@ void checkShader(string type, int &object, int *success, char *info) {
 		glShaderSource(object, 1, &fragment_shader, NULL);
 		glCompileShader(object);
 		glGetShaderiv(object, GL_COMPILE_STATUS, success);
-		if (!success) {
+		if (!*success) {
 			glGetShaderInfoLog(object, 520, NULL, info);
 			cout << "FRAGMENTSAHDER ERROR:" << info << endl;
 		}
@@ -225,4 +245,27 @@ void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, G
 			camera.key_status[key] = false;
 	}
 
+}
+
+void initLight() {
+	light.Ambient = glm::vec3(0.0, 0.0, 0.0);
+	light.LightColor = glm::vec3(0.5, 0.5, 0.5);
+	light.LightPosition = glm::vec3(1.0, 1.0, 1.0);
+	light.ConstantAttenuation = 0.2;
+	light.LinearAttenuation = 0.3;
+	light.QuadraticAttenuation = 0.4;
+}
+void processLight(GLuint shaderprogram) {
+	GLuint ambientID = glGetUniformLocation(shaderprogram, "Ambient");
+	GLuint lightColorID = glGetUniformLocation(shaderprogram, "LightColor");
+	GLuint lightPosition = glGetUniformLocation(shaderprogram, "LightPosition");
+	GLuint constantAttenuationID = glGetUniformLocation(shaderprogram, "ConstantAttenuation");
+	GLuint linearAttenuationID = glGetUniformLocation(shaderprogram, "LinearAttenuation");
+	GLuint quadraticAttenuationID = glGetUniformLocation(shaderprogram, "QuadraticAttenuation");
+	glUniform3fv(ambientID, 1, &light.Ambient[0]);
+	glUniform3fv(lightColorID, 1, &light.LightColor[0]);
+	glUniform3fv(lightPosition, 1, &light.LightPosition[0]);
+	glUniform1f(constantAttenuationID, light.ConstantAttenuation);
+	glUniform1f(linearAttenuationID, light.LinearAttenuation);
+	glUniform1f(quadraticAttenuationID, light.QuadraticAttenuation);
 }
