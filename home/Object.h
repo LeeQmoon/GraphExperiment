@@ -27,7 +27,7 @@ struct material {
 	glm::vec3 Kd;//漫反射系数
 	glm::vec3 Ks;//镜面反射系数
 				 //环境反射指定贴图
-	string map_Ka;
+	string map_Ks;
 	//漫反射指定贴图
 	string map_Kd;
 };
@@ -47,13 +47,14 @@ public:
 	Material material;//每个对象只有一种材质
 	GLuint VBO;
 	GLuint VAO;
-	GLuint texture;
+	GLuint texture[2];
+	int texturecount[2];
 
 	Object();
 	Object(const Object &object);
 	void setBufferAndVertexArray();//flag传参代表是否有索引
 	void seTexture();//path是纹理所在的路径
-	void draw();
+	void draw(unsigned int shaderprogram);
 	void deleteVBOAndVAOAndTexture();
 	void print();
 	~Object();

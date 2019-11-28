@@ -20,9 +20,9 @@ void Model::readObj() {
 	string str;
 	int v = 0, t = 0, n = 0;//记录各个点的数量
 	int flag = -1;//记录轮到那个对象了
-	Point pointTemp[5000];//临时顶点数组
-	Texture textureTemp[3000];//临时纹理数组
-	Point normalTemp[2000];//临时法向量数组
+	Point pointTemp[20000];//临时顶点数组
+	Texture textureTemp[10000];//临时纹理数组
+	Point normalTemp[15000];//临时法向量数组
 	int vv = 0, tt = 0, nn = 0;
 	if (ffile.is_open()) {
 		//行读
@@ -143,9 +143,9 @@ void Model::readMtl() {
 				ss >> Ks.x >> Ks.y >> Ks.z;
 				materialTemp[flag].Ks = Ks;
 			}
-			else if (temp == "map_Ka") {
+			else if (temp == "map_Ks") {
 				ss >> temp;
-				materialTemp[flag].map_Ka = temp;
+				materialTemp[flag].map_Ks = temp;
 			}
 			else if (temp == "map_Kd") {
 				ss >> temp;
@@ -170,18 +170,19 @@ void Model::processMaterial(Material *materialTemp, int count) {
 	//更改后----lee---
 	//只设置一次VBO,VAO，要不会不断的申请内存
 	for (int i = 0; i < size; i++) {
-		objects[i].setBufferAndVertexArray();
+		objects[i].print();
 		objects[i].seTexture();
+		objects[i].setBufferAndVertexArray();
 	}
 
 }
 
-void Model::display() {
+void Model::display(unsigned int shaderprogram) {
 	for (int i = 0; i < size; i++) {
 		//---更改前----
 		//objects[i].setBufferAndVertexArray();
 		//objects[i].seTexture();
-		objects[i].draw();
+		objects[i].draw(shaderprogram);
 	}
 }
 

@@ -20,7 +20,7 @@ public:
 	void readObj();
 	void readMtl();
 	void processMaterial(Material *temp, int count);
-	void display();
+	void display(unsigned int shaderprogram);
 	~Model();
 };
 

@@ -83,8 +83,8 @@ int main() {
 	Model modell("homework.obj");
 	modell.readObj();
 	/*for (int i = 0; i < modell.size; i++)
-	modell.objects[i].print();
-	*/
+	modell.objects[i].print();*/
+
 
 	initLight();//初始化光源参数
 
@@ -99,7 +99,8 @@ int main() {
 	glDeleteShader(vertexshader);
 	glDeleteShader(fragmentshader);
 
-	model = glm::translate(model, glm::vec3(0.3, -1.0, 0.0));
+	model = glm::translate(model, glm::vec3(0.3, -1.5, 0.0));
+	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
 	model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
 	GLuint modelId = glGetUniformLocation(shaderprogram, "model");
 
@@ -119,7 +120,7 @@ int main() {
 		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionId, 1, GL_FALSE, glm::value_ptr(projection));
 		processLight(shaderprogram);//将光源信息传至shader
-		modell.display();  //   这个好像特别慢   -------------------------log----------------------
+		modell.display(shaderprogram);  //   这个好像特别慢   -------------------------log----------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();//轮询事件队列
 	}
@@ -162,7 +163,7 @@ void checkShader(string type, int &object, int *success, char *info) {
 		object = glCreateShader(GL_VERTEX_SHADER);
 		glShaderSource(object, 1, &vertex_shader, NULL);
 		glCompileShader(object);
-		
+
 		glGetShaderiv(object, GL_COMPILE_STATUS, success);
 		if (!*success) {
 			glGetShaderInfoLog(object, 520, NULL, info);
@@ -249,8 +250,8 @@ void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, G
 
 void initLight() {
 	light.Ambient = glm::vec3(0.0, 0.0, 0.0);
-	light.LightColor = glm::vec3(0.5, 0.5, 0.5);
-	light.LightPosition = glm::vec3(1.0, 1.0, 1.0);
+	light.LightColor = glm::vec3(0.64, 0.64, 0.64);
+	light.LightPosition = glm::vec3(0.0,20.0, 50.0);
 	light.ConstantAttenuation = 0.2;
 	light.LinearAttenuation = 0.3;
 	light.QuadraticAttenuation = 0.4;

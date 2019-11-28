@@ -7,7 +7,6 @@ using namespace std;
 
 class Camera {
 private:
-	glm::vec3 position;//位置
 	float fov;//视角
 	float yaw;//偏航角
 	float pitch;//俯仰角
@@ -16,6 +15,8 @@ private:
 	glm::mat4 view;//未转置前的观察矩阵，即是相机本身的旋转得出的矩阵   -----存这个主要是为了键盘控制时获取观察方向----
 
 public:
+	glm::vec3 Zaxi;
+	glm::vec3 position;//位置
 	GLboolean key_status[1024];//键盘标志设置 ---看哪个键被按下了-----
 	Camera(glm::vec3 Position = glm::vec3(0.0,0.0,8.0)) {
 		position = Position;
