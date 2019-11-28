@@ -82,7 +82,6 @@ int main() {
 
 	Shader shader("vertex.vs", "fragment.fs");
 
-
 	model = glm::translate(model, glm::vec3(0.3, -1.5, 0.0));
 	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
 	model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
@@ -173,9 +172,9 @@ void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, G
 }
 
 void initLight() {
-	light.Ambient = glm::vec3(0.0, 0.0, 0.0);
-	light.LightColor = glm::vec3(0.64, 0.64, 0.64);
-	light.LightPosition = glm::vec3(0.0,20.0, 50.0);
+	light.Ambient = glm::vec3(0.3, 0.3, 0.3);
+	light.LightColor = glm::vec3(1.0,1.0,1.0);
+	light.LightPosition = glm::vec3(0.0,0.0, 8.0);
 	light.ConstantAttenuation = 0.2;
 	light.LinearAttenuation = 0.3;
 	light.QuadraticAttenuation = 0.4;

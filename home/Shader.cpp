@@ -41,8 +41,8 @@ void Shader::loadShaderSource(const char *vShaderPath, const char *fShaderPath) 
 		vss << vfile.rdbuf();//把文件流缓冲区的内容输入到字符流中
 		string vstr = vss.str();
 		const char *vertex_shader = vstr.c_str();//获得顶点着色器代码
-		for (int i = 0; i < vstr.size(); i++)
-			cout << vertex_shader[i];										 
+		/*for (int i = 0; i < vstr.size(); i++)
+			cout << vertex_shader[i];			*/							 
 		createShader(vertex_shader, "vertex");
 		vfile.close();
 	}
@@ -50,8 +50,8 @@ void Shader::loadShaderSource(const char *vShaderPath, const char *fShaderPath) 
 		fss << ffile.rdbuf();//把文件流的缓冲区内容弄到字符流
 		string fstr = fss.str();//fstr把字符流中的字符串全部读出
 		const char *fragment_shader = fstr.c_str();
-		for (int i = 0; i < fstr.size(); i++)
-			cout << fragment_shader[i];
+		/*for (int i = 0; i < fstr.size(); i++)
+			cout << fragment_shader[i];*/
 		createShader(fragment_shader, "fragment");
 		ffile.close();
 	}

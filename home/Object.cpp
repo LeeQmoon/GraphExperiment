@@ -5,26 +5,22 @@
 #include "stb_image.h"
 
 Object::Object() {
-	maxsize = 20000;// 更改后  -------------------------log----------------------
-	vertices = new Point[maxsize];
-	texture_coords = new Texture[maxsize];
-	normal = new Point[maxsize];
-	// maxsize = 50000; // 更改前  -------------------------log----------------------
-	verSize = 0;
-	texSize = 0;
-	norSize = 0;
-	for (int i = 0; i < 3; i++)
+	this->VAO = 0;
+	this->VBO = 0;
+	for (int i = 0; i < 2; i++) 
 		this->texturecount[i] = 0;
 }
-
-Object::Object(const Object &object) {
-	
+Object::Object(string material_name) {
+	this->VAO = 0;
+	this->VBO = 0;
+	for (int i = 0; i < 2; i++)
+		this->texturecount[i] = 0;
+	this->material.material_name = material_name;
 }
-
 void Object::setBufferAndVertexArray() {
-	verSize = sizeof(Point)*verSize;
-	texSize = sizeof(Texture)*texSize;
-	norSize = sizeof(Point)*norSize;
+	auto verSize = sizeof(Point)*this->vertices.size();
+	auto texSize = sizeof(Texture)*this->texture_coords.size();
+	auto norSize = sizeof(Point)*this->normal.size();
 	auto totalSize = verSize + texSize + norSize;
 
 	glGenVertexArrays(1, &VAO);
@@ -53,9 +49,12 @@ void Object::seTexture() {
 		this->texturecount[0] = 1;
 	if (this->material.map_Ks != "")
 		this->texturecount[1] = 1;
+
 	int width, height, channels;
 	unsigned char *data;
-	glGenTextures(2, texture);
+	stbi_set_flip_vertically_on_load(true);//反转y值
+	glGenTextures(2, texture);//最多两张
+
 	if (this->texturecount[0]) {
 		glBindTexture(GL_TEXTURE_2D, texture[0]);//生成纹理对象
 											  //设置参数
@@ -65,8 +64,6 @@ void Object::seTexture() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//大时
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		//加载数据
-		stbi_set_flip_vertically_on_load(true);//反转y值
 		//material.map_Ka.c_str()
 		data = stbi_load(material.map_Kd.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
 		if (data) {
@@ -89,7 +86,6 @@ void Object::seTexture() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//大时
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		stbi_set_flip_vertically_on_load(true);//反转y值
 		data = stbi_load(material.map_Ks.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
 		if (data) {
 			//把纹素弄进GPU
@@ -114,44 +110,30 @@ void Object::draw(unsigned int shaderprogram) {
 	if (this->texturecount[0]) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
+		glUniform1i(glGetUniformLocation(shaderprogram, "tex0"), 0);
 	}
 	if (this->texturecount[1]) {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture[1]);
+		glUniform1i(glGetUniformLocation(shaderprogram, "tex1"), 1);
 	}
+	//传材质属性到shader
+	glUniform1f(glGetUniformLocation(shaderprogram, "material.Ns"), material.Ns);
+	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Ka"), 1, &material.Ka[0]);
+	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Kd"), 1, &material.Kd[0]);
+	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Ks"), 1, &material.Ks[0]);
+
 	glBindVertexArray(VAO);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	glDrawArrays(GL_TRIANGLES, 0, verSize/sizeof(Point));
+	glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
 }
 
 void Object::print() {
-	cout << this->material.map_Kd << "  " << this->material.map_Ks << endl;
-	/*vertices;
-	cout << this->normal[0].x << "  " << this->normal[0].y << "  " << this->normal[0].z << endl;
-	for (int i = 0; i < verSize; i++) {
+	cout << "versize = " << vertices.size() << endl;
+	for (int i = 0; i < vertices.size(); i++)
 		cout << vertices[i].x << "  " << vertices[i].y << "  " << vertices[i].z << endl;
-	}
-	cout << "-------------------" << endl;*/
-	//for (int i = 0; i < texSize; i++) {
-	//	cout << texture_coords[i].s << "  " << texture_coords[i].t << endl;
-	//}
-	/*cout << "versize: " << verSize << endl;
-	cout << "texsize: " << texSize << endl;
-	cout << "norsize: " << norSize << endl;
-	cout << endl;
-	cout << "Ns: " << material.Ns << endl;
-	cout << "d: " << material.d << endl;
-	cout << "illum: " << material.illum << endl;
-	cout << "Ka: " << material.Ka.x << "  " << material.Ka.y << "  " << material.Ka.z << endl;
-	cout << "Kd: " << material.Kd.x << "  " << material.Kd.y << "  " << material.Kd.z << endl;
-	cout << "Ks: " << material.Ks.x << "  "<<material.Ks.y<<"  " << material.Ks.z << endl;
-	cout << "map_Ka: " << material.map_Ka << endl;
-	cout << "map_Kd: " << material.map_Kd << endl;
-	cout << endl;*/
+	//cout << this->material.Ns << "  " << this->material.Kd.x << "  " << this->material.Ks.x << "  " << this->material.map_Kd << endl;
 }
 
 Object::~Object() {
-	delete[]vertices;
-	delete[]texture_coords;
-	delete[]normal;
 }

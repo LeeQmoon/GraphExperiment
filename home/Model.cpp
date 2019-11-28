@@ -8,8 +8,6 @@ using namespace std;
 
 Model::Model(const string &path) {
 	ObjPath = path;
-	maxsize = 30; // 更改后  -------------------------log----------------------
-	objects = new Object[maxsize];
 	// maxsize = 30 // 更改前  -------------------------log----------------------
 	size = 0;
 }
@@ -58,7 +56,9 @@ void Model::readObj() {
 				//object.material.material_name = temp;//保存对象材质名
 				//	cout << "usemtl: "<<object.material.material_name << endl;
 				//this->objects[size++] = (object);
-				this->objects[size++].material.material_name = temp;
+			//---更改--
+				//this->objects[size++].material.material_name = temp;
+				this->objects.emplace_back(temp);
 				flag++;
 				//cout << objects[flag].texSize << endl;
 				//cout << flag << endl;
@@ -69,22 +69,20 @@ void Model::readObj() {
 				for (int i = 0; i < 3; i++) {//三角形图元
 					ss >> verIndex >> ch >> texIndex >> ch >> norIndex;
 					// cout << verIndex << " " << texIndex << " " << norIndex << " " << endl;
-					this->objects[flag].vertices[objects[flag].verSize++] = pointTemp[verIndex - 1];
+					this->objects[flag].vertices.emplace_back(pointTemp[verIndex - 1].x, pointTemp[verIndex - 1].y, pointTemp[verIndex - 1].z);
+					this->objects[flag].texture_coords.emplace_back(textureTemp[texIndex - 1].s, textureTemp[texIndex - 1].t);
+					this->objects[flag].normal.emplace_back(normalTemp[norIndex - 1].x, normalTemp[norIndex - 1].y, normalTemp[norIndex - 1].z);
+					/*this->objects[flag].vertices[objects[flag].verSize++] = pointTemp[verIndex - 1];
 					this->objects[flag].texture_coords[objects[flag].texSize++] = textureTemp[texIndex - 1];
-					this->objects[flag].normal[objects[flag].norSize++] = normalTemp[norIndex - 1];
+					this->objects[flag].normal[objects[flag].norSize++] = normalTemp[norIndex - 1];*/
 				}
 			}
 		}
 	}
 	//cout << v << "  " << t << "  " << n << endl;
-
 	//v = t = n = 0;
 	//cout << v << "  " << t << "  " << n << endl;
-	/*for (int i = 0; i < size; i++) {
-	objects[i].verSize = v;
-	objects[i].texSize = t;
-	objects[i].norSize = n;
-	}*/
+	//cout << objects.size() << endl;
 	ffile.close();
 	readMtl();
 }
@@ -100,7 +98,7 @@ void Model::readMtl() {
 	int flag = -1;//记录第几个材质
 	if (ffile.is_open()) {
 		while (getline(ffile, str)) {
-			//cout << str;
+			//cout << str<<endl;
 			stringstream ss;
 			string temp;
 			ss << str;
@@ -158,7 +156,7 @@ void Model::readMtl() {
 }
 
 void Model::processMaterial(Material *materialTemp, int count) {
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < objects.size(); i++) {
 		for (int m = 0; m < count; m++) {
 			if (materialTemp[m].material_name == objects[i].material.material_name) {
 				objects[i].material = materialTemp[m];//拷贝过来
@@ -169,8 +167,8 @@ void Model::processMaterial(Material *materialTemp, int count) {
 
 	//更改后----lee---
 	//只设置一次VBO,VAO，要不会不断的申请内存
-	for (int i = 0; i < size; i++) {
-		objects[i].print();
+	for (int i = 0; i < objects.size(); i++) {
+		//objects[i].print();
 		objects[i].seTexture();
 		objects[i].setBufferAndVertexArray();
 	}
@@ -178,7 +176,7 @@ void Model::processMaterial(Material *materialTemp, int count) {
 }
 
 void Model::display(unsigned int shaderprogram) {
-	for (int i = 0; i < size; i++) {
+	for (int i = 0; i < objects.size(); i++) {
 		//---更改前----
 		//objects[i].setBufferAndVertexArray();
 		//objects[i].seTexture();
@@ -190,5 +188,4 @@ Model::~Model() {
 	for (int i = 0; i < size; i++) {
 		objects[i].deleteVBOAndVAOAndTexture();
 	}
-	delete[]objects;
 }
