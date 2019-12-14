@@ -31,6 +31,7 @@ struct texture {
 };
 struct material {
 	string material_name;//所用的材质名
+	glm::vec3 emission;//自身发光度
 	float Ns;//高光度
 	float d;//透明度
 	int illum;//所用光照模型

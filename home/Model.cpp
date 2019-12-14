@@ -162,9 +162,9 @@ void Model::processMaterial(Material *materialTemp, int count) {
 	for (int i = 0; i < objects.size(); i++) {
 
 		//objects[i].caculateTangent();
-		//objects[i].print();
 		objects[i].seTexture();
 		objects[i].setBufferAndVertexArray();
+		//objects[i].print();
 	}
 
 }

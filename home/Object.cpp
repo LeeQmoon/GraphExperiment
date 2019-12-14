@@ -16,6 +16,7 @@ Object::Object(string material_name) {
 	for (int i = 0; i < 2; i++)
 		this->texturecount[i] = 0;
 	this->material.material_name = material_name;
+	
 }
 void Object::setBufferAndVertexArray() {
 	auto verSize = sizeof(Point)*this->vertices.size();
@@ -44,6 +45,12 @@ void Object::setBufferAndVertexArray() {
 
 //path 图片路径,value纹理单元值
 void Object::seTexture() {
+	if (this->material.material_name == "map_4_lambert5SG") {
+		this->material.emission = glm::vec3(0.0, 0.0, 0.8);
+	}
+	else
+		this->material.emission = glm::vec3(0.0, 0.0, 0.0);
+
 	if (this->material.map_Ka != "")
 		this->texturecount[0] = 1;
 	if (this->material.map_Kd != "")
@@ -121,7 +128,7 @@ void Object::draw(unsigned int shaderprogram) {
 	glUniform1f(glGetUniformLocation(shaderprogram, "material.Ns"), material.Ns);
 	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Ka"), 1, &material.Ka[0]);
 	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Kd"), 1, &material.Kd[0]);
-
+	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Emission"), 1, &(material.emission[0]));
 	glBindVertexArray(VAO);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
@@ -137,8 +144,8 @@ void Object::print() {
 	cout << "normal: " << endl;
 	for (int i = 0; i < normal.size(); i++)
 		cout << normal[i].x << "  " << normal[i].y << "  " << normal[i].z << endl;*/
-	cout << this->material.Ns << "  " << this->material.Kd.x << "  " << this->material.Ks.x << "  " << this->material.map_Kd << endl;
-}
+	cout << this->material.emission.x << "  " << this->material.emission.y << "  " << this->material.emission.z << endl;
 
+}
 Object::~Object() {
 }

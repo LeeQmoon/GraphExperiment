@@ -9,9 +9,10 @@ uniform mat4 view;
 uniform mat4 projection;
 out vec3 NormalCoord;
 out vec2 TextureCoord;
+out vec4 position;
 
 void main(){
-    
+    position = model*vec4(aPos.x,aPos.y,aPos.z,1.0);
     gl_Position=projection*view*model*vec4(aPos.x,aPos.y,aPos.z,1.0);
     NormalCoord = normalize(mat3(transpose(inverse((model))))*Normal);
     TextureCoord = Texcoord;
