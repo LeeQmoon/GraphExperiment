@@ -18,19 +18,19 @@ public:
 	glm::vec3 Zaxi;
 	glm::vec3 position;//位置
 	GLboolean key_status[1024];//键盘标志设置 ---看哪个键被按下了-----
-	Camera(glm::vec3 Position = glm::vec3(0.0,0.0,8.0)) {
+	Camera(glm::vec3 Position = glm::vec3(0.0, 10.0, 35.0)) {
 		position = Position;
 		fov = 45.0;
 		yaw = 0;//之所以为0，是因为位置的设置，使得两者初始时就重叠
 		pitch = 0;//之所以为0，是因为摄像机坐标最初就已经跟惯性坐标系重叠了
-		sensitivity = 0.05;
-		movementSpeed = 1.5f;
+		sensitivity = 1.5;
+		movementSpeed = 0.5f;
 
 	}
 
 	glm::mat4 getView();
 	float getFov();
-	void mouseMovement(double xoffset,double yoffset);//鼠标光标改变
+	void mouseMovement(double xoffset, double yoffset);//鼠标光标改变
 	void scrollChange(double yoffset);//滚轮转动
 	void keyMovement();
 };

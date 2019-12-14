@@ -51,38 +51,26 @@ void Model::readObj() {
 				textureTemp[tt++] = tex;
 			}
 			else if (temp == "usemtl") {
-				//Object object;
 				ss >> temp;
-				//object.material.material_name = temp;//保存对象材质名
-				//	cout << "usemtl: "<<object.material.material_name << endl;
-				//this->objects[size++] = (object);
-			//---更改--
-				//this->objects[size++].material.material_name = temp;
+				//Object oo(temp);
 				this->objects.emplace_back(temp);
 				flag++;
-				//cout << objects[flag].texSize << endl;
-				//cout << flag << endl;
 			}
 			else if (temp == "f") {
 				char ch;//除掉'/'
 				int verIndex, texIndex, norIndex;
 				for (int i = 0; i < 3; i++) {//三角形图元
 					ss >> verIndex >> ch >> texIndex >> ch >> norIndex;
-					// cout << verIndex << " " << texIndex << " " << norIndex << " " << endl;
 					this->objects[flag].vertices.emplace_back(pointTemp[verIndex - 1].x, pointTemp[verIndex - 1].y, pointTemp[verIndex - 1].z);
-					this->objects[flag].texture_coords.emplace_back(textureTemp[texIndex - 1].s, textureTemp[texIndex - 1].t);
 					this->objects[flag].normal.emplace_back(normalTemp[norIndex - 1].x, normalTemp[norIndex - 1].y, normalTemp[norIndex - 1].z);
-					/*this->objects[flag].vertices[objects[flag].verSize++] = pointTemp[verIndex - 1];
-					this->objects[flag].texture_coords[objects[flag].texSize++] = textureTemp[texIndex - 1];
-					this->objects[flag].normal[objects[flag].norSize++] = normalTemp[norIndex - 1];*/
+					this->objects[flag].texture_coords.emplace_back(textureTemp[texIndex - 1].s, textureTemp[texIndex - 1].t);
+					//this->objects[flag].normal.emplace_back(normalTemp[norIndex - 1].x, normalTemp[norIndex - 1].y, normalTemp[norIndex - 1].z);
+					
 				}
 			}
 		}
 	}
-	//cout << v << "  " << t << "  " << n << endl;
-	//v = t = n = 0;
-	//cout << v << "  " << t << "  " << n << endl;
-	//cout << objects.size() << endl;
+	
 	ffile.close();
 	readMtl();
 }
@@ -149,6 +137,10 @@ void Model::readMtl() {
 				ss >> temp;
 				materialTemp[flag].map_Kd = temp;
 			}
+			else if (temp == "map_Ka") {
+				ss >> temp;
+				materialTemp[flag].map_Ka = temp;
+			}
 		}
 	}
 	ffile.close();
@@ -168,6 +160,8 @@ void Model::processMaterial(Material *materialTemp, int count) {
 	//更改后----lee---
 	//只设置一次VBO,VAO，要不会不断的申请内存
 	for (int i = 0; i < objects.size(); i++) {
+
+		//objects[i].caculateTangent();
 		//objects[i].print();
 		objects[i].seTexture();
 		objects[i].setBufferAndVertexArray();

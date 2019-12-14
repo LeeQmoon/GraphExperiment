@@ -13,7 +13,7 @@ struct point {
 	float x;
 	float y;
 	float z;
-	point(){}
+	point() {}
 	point(float X, float Y, float Z) {
 		x = X;
 		y = Y;
@@ -23,7 +23,7 @@ struct point {
 struct texture {
 	float s;
 	float t;
-	texture(){}
+	texture() {}
 	texture(float S, float T) {
 		s = S;
 		t = T;
@@ -37,7 +37,9 @@ struct material {
 	glm::vec3 Ka;//环境光反射系数
 	glm::vec3 Kd;//漫反射系数
 	glm::vec3 Ks;//镜面反射系数
+	string map_Ka;
 	string map_Kd;
+	string map_Bump;
 	string map_Ks;
 };
 
@@ -50,7 +52,6 @@ public:
 	vector<Point>vertices;
 	vector<Texture>texture_coords;
 	vector<Point>normal;
-
 	Material material;//每个对象只有一种材质
 	GLuint VBO;
 	GLuint VAO;

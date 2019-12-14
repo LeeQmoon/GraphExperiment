@@ -1,3 +1,11 @@
+/*
+author: Lee by 2019/12/14
+idea:
+	1.有白天黑夜之分
+	2.白天只有太阳光及其相应地环境光
+	3.晚上有三个点光并且有其相应地环境光
+	4.第三人称摄像机
+*/
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
 #include<glm/glm.hpp>
@@ -12,18 +20,11 @@
 #include"Model.h"
 #include<iomanip>
 #include"Shader.h"
+#include"Light.h"
 using namespace std;
 
-struct Light {
-	glm::vec3 Ambient;
-	glm::vec3 LightColor;
-	glm::vec3 LightPosition;
-	float ConstantAttenuation;
-	float LinearAttenuation;
-	float QuadraticAttenuation;
-};
-struct Light light;
 
+Light light;
 
 const int width = 800;
 const int height = 600;
@@ -42,8 +43,6 @@ void scrollCallBack(GLFWwindow *window, double x, double yoffset);//滚轮变化
 void mouseButtonCallBack(GLFWwindow *window, int button, int action, int mod);//鼠标左键按着
 void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, GLint mods);//键盘回调
 void handleModel();//处理模型矩阵
-void initLight();
-void processLight(GLuint shaderprogram);
 
 
 int main() {
@@ -71,20 +70,20 @@ int main() {
 	glfwSetKeyCallback(window, key_callback);
 	glViewport(0, 0, width, height);
 	glEnable(GL_DEPTH_TEST);
-
-	Model modell("homework.obj");
+	
+	Model modell("FinalHome.obj");
 	modell.readObj();
 	/*for (int i = 0; i < modell.size; i++)
 	modell.objects[i].print();*/
 
 
-	initLight();//初始化光源参数
+	light.initLight();//初始化光源参数
 
 	Shader shader("vertex.vs", "fragment.fs");
 
-	model = glm::translate(model, glm::vec3(0.3, -1.5, 0.0));
-	model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-	model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
+	model = glm::translate(model, glm::vec3(0.0, -1.5, 0.0));
+	//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+	//model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
 	GLuint modelId = shader.getLocation("model");
 
 	//渲染循环
@@ -94,6 +93,7 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //
 		shader.activeProgram();
 
+		//glUniform3fv(shader.getLocation("Eye"), 1, &camera.position[0]);
 		glm::mat4 view = camera.getView();//观察矩阵
 		GLuint viewId = shader.getLocation("view");
 		//投影矩阵
@@ -102,7 +102,7 @@ int main() {
 		glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionId, 1, GL_FALSE, glm::value_ptr(projection));
-		processLight(shader.shaderprogram);//将光源信息传至shader
+		light.processLight(shader.shaderprogram);//将光源信息传至shader
 		modell.display(shader.shaderprogram);  //   这个好像特别慢   -------------------------log----------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();//轮询事件队列
@@ -169,27 +169,4 @@ void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, G
 			camera.key_status[key] = false;
 	}
 
-}
-
-void initLight() {
-	light.Ambient = glm::vec3(0.3, 0.3, 0.3);
-	light.LightColor = glm::vec3(1.0,1.0,1.0);
-	light.LightPosition = glm::vec3(0.0,0.0, 8.0);
-	light.ConstantAttenuation = 0.2;
-	light.LinearAttenuation = 0.3;
-	light.QuadraticAttenuation = 0.4;
-}
-void processLight(GLuint shaderprogram) {
-	GLuint ambientID = glGetUniformLocation(shaderprogram, "Ambient");
-	GLuint lightColorID = glGetUniformLocation(shaderprogram, "LightColor");
-	GLuint lightPosition = glGetUniformLocation(shaderprogram, "LightPosition");
-	GLuint constantAttenuationID = glGetUniformLocation(shaderprogram, "ConstantAttenuation");
-	GLuint linearAttenuationID = glGetUniformLocation(shaderprogram, "LinearAttenuation");
-	GLuint quadraticAttenuationID = glGetUniformLocation(shaderprogram, "QuadraticAttenuation");
-	glUniform3fv(ambientID, 1, &light.Ambient[0]);
-	glUniform3fv(lightColorID, 1, &light.LightColor[0]);
-	glUniform3fv(lightPosition, 1, &light.LightPosition[0]);
-	glUniform1f(constantAttenuationID, light.ConstantAttenuation);
-	glUniform1f(linearAttenuationID, light.LinearAttenuation);
-	glUniform1f(quadraticAttenuationID, light.QuadraticAttenuation);
 }

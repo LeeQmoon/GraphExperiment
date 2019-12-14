@@ -7,7 +7,7 @@
 Object::Object() {
 	this->VAO = 0;
 	this->VBO = 0;
-	for (int i = 0; i < 2; i++) 
+	for (int i = 0; i < 2; i++)
 		this->texturecount[i] = 0;
 }
 Object::Object(string material_name) {
@@ -37,7 +37,6 @@ void Object::setBufferAndVertexArray() {
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
 	glEnableVertexAttribArray(2);
-
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -45,9 +44,9 @@ void Object::setBufferAndVertexArray() {
 
 //path 图片路径,value纹理单元值
 void Object::seTexture() {
-	if (this->material.map_Kd != "")
+	if (this->material.map_Ka != "")
 		this->texturecount[0] = 1;
-	if (this->material.map_Ks != "")
+	if (this->material.map_Kd != "")
 		this->texturecount[1] = 1;
 
 	int width, height, channels;
@@ -57,7 +56,7 @@ void Object::seTexture() {
 
 	if (this->texturecount[0]) {
 		glBindTexture(GL_TEXTURE_2D, texture[0]);//生成纹理对象
-											  //设置参数
+												 //设置参数
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 		//纹素比像素小时，加权平均
@@ -65,7 +64,7 @@ void Object::seTexture() {
 		//大时
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		//material.map_Ka.c_str()
-		data = stbi_load(material.map_Kd.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
+		data = stbi_load(material.map_Ka.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
 		if (data) {
 			//把纹素弄进GPU
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -86,7 +85,7 @@ void Object::seTexture() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		//大时
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		data = stbi_load(material.map_Ks.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
+		data = stbi_load(material.map_Kd.c_str(), &width, &height, &channels, 0);//把纹理解码为图像数据存储
 		if (data) {
 			//把纹素弄进GPU
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -106,7 +105,8 @@ void Object::deleteVBOAndVAOAndTexture() {
 }
 
 void Object::draw(unsigned int shaderprogram) {
-	glUniform1iv(glGetUniformLocation(shaderprogram, "texturecount"), 1, &texturecount[0]);
+	glm::ivec2 tt(texturecount[0], texturecount[1]);
+	glUniform3iv(glGetUniformLocation(shaderprogram, "texturecount"), 1, &tt[0]);
 	if (this->texturecount[0]) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
@@ -121,7 +121,6 @@ void Object::draw(unsigned int shaderprogram) {
 	glUniform1f(glGetUniformLocation(shaderprogram, "material.Ns"), material.Ns);
 	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Ka"), 1, &material.Ka[0]);
 	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Kd"), 1, &material.Kd[0]);
-	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Ks"), 1, &material.Ks[0]);
 
 	glBindVertexArray(VAO);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -129,10 +128,16 @@ void Object::draw(unsigned int shaderprogram) {
 }
 
 void Object::print() {
-	cout << "versize = " << vertices.size() << endl;
+	/*cout << "versize = " << vertices.size() << endl;
 	for (int i = 0; i < vertices.size(); i++)
 		cout << vertices[i].x << "  " << vertices[i].y << "  " << vertices[i].z << endl;
-	//cout << this->material.Ns << "  " << this->material.Kd.x << "  " << this->material.Ks.x << "  " << this->material.map_Kd << endl;
+	cout << "tangent: " << endl;
+	for (int i = 0; i < tangent.size(); i++)
+		cout << tangent[i].x << "  " << tangent[i].y << "  " << tangent[i].z << endl;
+	cout << "normal: " << endl;
+	for (int i = 0; i < normal.size(); i++)
+		cout << normal[i].x << "  " << normal[i].y << "  " << normal[i].z << endl;*/
+	cout << this->material.Ns << "  " << this->material.Kd.x << "  " << this->material.Ks.x << "  " << this->material.map_Kd << endl;
 }
 
 Object::~Object() {
