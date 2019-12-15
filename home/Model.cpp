@@ -10,6 +10,22 @@ Model::Model(const string &path) {
 	ObjPath = path;
 	// maxsize = 30 // 更改前  -------------------------log----------------------
 	size = 0;
+	this->radinaryModel = glm::mat4(
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 0.0, 1.0
+	);
+	//radinaryModel = glm::translate(radinaryModel, glm::vec3(0.0, -1.5, 0.0));
+	radinaryModel = glm::scale(radinaryModel, glm::vec3(0.1, 0.1, 0.1));
+	this->playerModel = glm::mat4(
+		1.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 0.0, 1.0, 0.0,
+		0.0, 0.0, 0.0, 1.0
+	);
+	//playerModel = glm::translate(playerModel, glm::vec3(0.0, -1.5, 0.0));
+	playerModel = glm::scale(playerModel, glm::vec3(0.1, 0.1, 0.1));
 }
 
 void Model::readObj() {
@@ -55,6 +71,8 @@ void Model::readObj() {
 				//Object oo(temp);
 				this->objects.emplace_back(temp);
 				flag++;
+				if (temp == "Material__30")
+					indexOfPlayer = flag;
 			}
 			else if (temp == "f") {
 				char ch;//除掉'/'
@@ -73,6 +91,23 @@ void Model::readObj() {
 	
 	ffile.close();
 	readMtl();
+}
+
+void Model::spreadModel(int i, unsigned int shaderprogram, glm::mat4 &view) {
+	GLuint modelId = glGetUniformLocation(shaderprogram, "model");
+	GLuint viewId = glGetUniformLocation(shaderprogram, "view");
+	if (i == indexOfPlayer) {
+		//target = playerModel * this->target;
+		//glm::mat4 viewTemp = glm::transpose(view);
+		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(playerModel));
+		//glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(playerModel));
+	}
+	else {
+		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(radinaryModel));
+	}
+
 }
 
 void Model::readMtl() {
@@ -169,11 +204,13 @@ void Model::processMaterial(Material *materialTemp, int count) {
 
 }
 
-void Model::display(unsigned int shaderprogram) {
+void Model::display(unsigned int shaderprogram,glm::mat4 &view) {
+
 	for (int i = 0; i < objects.size(); i++) {
 		//---更改前----
 		//objects[i].setBufferAndVertexArray();
 		//objects[i].seTexture();
+		spreadModel(i, shaderprogram,view);
 		objects[i].draw(shaderprogram);
 	}
 }

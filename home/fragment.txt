@@ -1,59 +1,8 @@
 #version 430 core
 in vec2 TextureCoord;
-in vec3 Position;
-in vec3 TangentFragPos;
-in vec3 TangentLightPos;
-in vec3 TangentEyePos;
 
-uniform ivec3 texturecount;
-
-uniform sampler2D tex0;//map_Kd
-uniform sampler2D tex1;//map_Bump
-uniform sampler2D tex2;//map_Ks
-struct Material{
-    vec3 Ka;
-    vec3 Kd;
-    vec3 Ks;
-    float Ns;
-};
-uniform Material material;
-uniform vec3 Ambient;
-uniform vec3 LightColor;
-
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
-
-uniform float ConstantAttenuation;
-uniform float LinearAttenuation;
-uniform float QuadraticAttenuation;
-
+uniform sampler2D tex1;//map_Kd
 void main(){
-    
-    vec3 nor = normalize(texture(tex1,TextureCoord).rgb*2.0-1.0);//
-    vec3 LightDirection = normalize(TangentLightPos-TangentFragPos);
-    float diffuse = max(0.0,dot(nor,LightDirection));
-    vec3 viewDire = normalize(TangentEyePos-TangentFragPos);
-    
-    vec3 H = normalize(LightDirection+viewDire);
-    float Specular = max(0.0,dot(nor,H));
-    float Specos=pow(max(Specular,0.0),material.Ns);
-    float attenuation =1.0;
-    
-    vec3 scatteredLight = Ambient+material.Kd*diffuse*attenuation;
-    vec3 reflect = material.Ks*Specos;
-    if(texturecount.x ==1 && texturecount.y == 1 && texturecount.z == 1){
-
-        vec4 tempColor1 = texture(tex0,TextureCoord);
-        vec4 tempColor2 = texture(tex2,TextureCoord);
-        vec3 rgb = min(tempColor1.rgb*scatteredLight+tempColor2.rgb*reflect,vec3(1.0));
-        gl_FragColor = vec4(rgb,1.0);
-       
-    }
-    if(texturecount.x==1 && texturecount.y == 1 && texturecount.z == 0){
-        vec4 tempColor1 = texture(tex0,TextureCoord);
-        vec3 rgb = min(tempColor1.rgb*scatteredLight+reflect,vec3(1.0));
-        gl_FragColor = vec4(rgb,1.0);
-        
-    }
+    vec4 tempColor1 = texture(tex1,TextureCoord);
+    gl_FragColor =tempColor1;
 }

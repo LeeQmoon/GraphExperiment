@@ -1,8 +1,6 @@
-﻿  Light.cpp
-c:\users\fullmoon\source\repos\home\home\light.cpp(24): warning C4305: “=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\light.cpp(25): warning C4305: “=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\light.cpp(26): warning C4305: “=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\light.cpp(40): warning C4305: “-=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\light.cpp(41): warning C4305: “-=”: 从“double”到“float”截断
-c:\users\fullmoon\source\repos\home\home\light.cpp(42): warning C4305: “-=”: 从“double”到“float”截断
+﻿  FollowObject.cpp
+c:\users\fullmoon\source\repos\home\home\followobject.cpp(75): warning C4244: “-=”: 从“double”转换到“float”，可能丢失数据
+c:\users\fullmoon\source\repos\home\home\followobject.cpp(76): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+c:\users\fullmoon\source\repos\home\home\followobject.cpp(90): warning C4244: “+=”: 从“double”转换到“float”，可能丢失数据
+c:\users\fullmoon\source\repos\home\home\followobject.cpp(101): warning C4244: “初始化”: 从“GLdouble”转换到“GLfloat”，可能丢失数据
   home.vcxproj -> C:\Users\Fullmoon\source\repos\home\Debug\home.exe
