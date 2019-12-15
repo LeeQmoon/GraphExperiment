@@ -1,10 +1,10 @@
 /*
 author: Lee by 2019/12/14
 idea:
-	1.有白天黑夜之分
-	2.白天只有太阳光及其相应地环境光
-	3.晚上有三个点光并且有其相应地环境光
-	4.第三人称摄像机
+1.有白天黑夜之分
+2.白天只有太阳光及其相应地环境光
+3.晚上有三个点光并且有其相应地环境光
+4.第三人称摄像机
 */
 #include<glad/glad.h>
 #include<GLFW/glfw3.h>
@@ -21,15 +21,14 @@ idea:
 #include<iomanip>
 #include"Shader.h"
 #include"Light.h"
-#include"FollowObject.h"
 using namespace std;
 
-FollowObject te(glm::vec3(1.0, 0.0, 0.0));
+
 Light light;
 
 const int width = 800;
 const int height = 600;
-//Camera camera;
+Camera camera;
 double last_xpos = 0.0;
 double last_ypos = 0.0;
 bool first = true;//第一次改变鼠标的位置
@@ -71,8 +70,8 @@ int main() {
 	glfwSetKeyCallback(window, key_callback);
 	glViewport(0, 0, width, height);
 	glEnable(GL_DEPTH_TEST);
-	
-	Model modell("Third.obj");
+
+	Model modell("FinalHome.obj");
 	modell.readObj();
 	/*for (int i = 0; i < modell.size; i++)
 	modell.objects[i].print();*/
@@ -80,27 +79,31 @@ int main() {
 
 	light.initLight();//初始化光源参数
 
-	Shader shader("vertex.txt", "fragment.txt");
+	Shader shader("vertex.vs", "fragment.fs");
 
-	te.caculateInitial();
+	model = glm::translate(model, glm::vec3(0.0, -1.5, 0.0));
+	//model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
+	//model = glm::scale(model, glm::vec3(0.01, 0.01, 0.01));
+	GLuint modelId = shader.getLocation("model");
 
 	//渲染循环
 	while (!glfwWindowShouldClose(window)) {
-		te.keyMovement(modell.playerModel);
+		camera.keyMovement();
 		glClearColor(0.2, 0.3, 0.3, 1.0);//
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //
 		shader.activeProgram();
 
 		//glUniform3fv(shader.getLocation("Eye"), 1, &camera.position[0]);
-		glm::mat4 view = te.getView();//观察矩阵
-		//GLuint viewId = shader.getLocation("view");
+		glm::mat4 view = camera.getView();//观察矩阵
+		GLuint viewId = shader.getLocation("view");
 		//投影矩阵
-		glm::mat4 projection = glm::perspective(glm::radians(te.getFov()), (float)width / (float)height, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.getFov()), (float)width / (float)height, 0.1f, 100.0f);
 		GLuint projectionId = shader.getLocation("projection");
-		//glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(modelId, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(viewId, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(projectionId, 1, GL_FALSE, glm::value_ptr(projection));
-		//light.processLight(shader.shaderprogram);//将光源信息传至shader
-		modell.display(shader.shaderprogram,view);  //   这个好像特别慢   -------------------------log----------------------
+		light.processLight(shader.shaderprogram);//将光源信息传至shader
+		modell.display(shader.shaderprogram);  //   这个好像特别慢   -------------------------log----------------------
 		glfwSwapBuffers(window);
 		glfwPollEvents();//轮询事件队列
 	}
@@ -133,11 +136,11 @@ void cursorCallBack(GLFWwindow *window, double xpos, double ypos) {
 	last_ypos = ypos;
 	xoff = xoffset;
 	handleModel();
-	te.mouseMovement(xoffset, yoffset);
+	camera.mouseMovement(xoffset, yoffset);
 }
 
 void scrollCallBack(GLFWwindow *window, double x, double yoffset) {
-	te.scrollChange(yoffset);
+	camera.scrollChange(yoffset);
 }
 
 void mouseButtonCallBack(GLFWwindow *window, int button, int action, int mod) {
@@ -161,9 +164,9 @@ void key_callback(GLFWwindow *window, GLint key, GLint scancode, GLint action, G
 	{
 		//设置按下/释放键为true或false
 		if (action == GLFW_PRESS)
-			te.key_status[key] = true;
+			camera.key_status[key] = true;
 		else if (action == GLFW_RELEASE)
-			te.key_status[key] = false;
+			camera.key_status[key] = false;
 	}
 
 }

@@ -16,13 +16,13 @@ Object::Object(string material_name) {
 	for (int i = 0; i < 2; i++)
 		this->texturecount[i] = 0;
 	this->material.material_name = material_name;
-	
+
 }
 void Object::setBufferAndVertexArray() {
 	auto verSize = sizeof(Point)*this->vertices.size();
 	auto texSize = sizeof(Texture)*this->texture_coords.size();
-	//auto norSize = sizeof(Point)*this->normal.size();
-	auto totalSize = verSize + texSize;// + norSize;
+	auto norSize = sizeof(Point)*this->normal.size();
+	auto totalSize = verSize + texSize + norSize;
 
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -31,13 +31,13 @@ void Object::setBufferAndVertexArray() {
 	glBufferData(GL_ARRAY_BUFFER, totalSize, NULL, GL_STATIC_DRAW);//创建足够大的缓冲区
 	glBufferSubData(GL_ARRAY_BUFFER, 0, verSize, &vertices[0]);
 	glBufferSubData(GL_ARRAY_BUFFER, verSize, texSize, &texture_coords[0]);
-	//glBufferSubData(GL_ARRAY_BUFFER, verSize + texSize, norSize, &normal[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, verSize + texSize, norSize, &normal[0]);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);//
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(verSize));
-	//glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(verSize + texSize));
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(verSize + texSize));
 	glEnableVertexAttribArray(0);
 	glEnableVertexAttribArray(1);
-	//glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(2);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
@@ -115,9 +115,9 @@ void Object::draw(unsigned int shaderprogram) {
 	glm::ivec2 tt(texturecount[0], texturecount[1]);
 	glUniform3iv(glGetUniformLocation(shaderprogram, "texturecount"), 1, &tt[0]);
 	if (this->texturecount[0]) {
-		/*glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture[0]);
-		glUniform1i(glGetUniformLocation(shaderprogram, "tex0"), 0);*/
+		glUniform1i(glGetUniformLocation(shaderprogram, "tex0"), 0);
 	}
 	if (this->texturecount[1]) {
 		glActiveTexture(GL_TEXTURE1);
@@ -125,10 +125,10 @@ void Object::draw(unsigned int shaderprogram) {
 		glUniform1i(glGetUniformLocation(shaderprogram, "tex1"), 1);
 	}
 	//传材质属性到shader
-	/*glUniform1f(glGetUniformLocation(shaderprogram, "material.Ns"), material.Ns);
+	glUniform1f(glGetUniformLocation(shaderprogram, "material.Ns"), material.Ns);
 	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Ka"), 1, &material.Ka[0]);
 	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Kd"), 1, &material.Kd[0]);
-	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Emission"), 1, &(material.emission[0]));*/
+	glUniform3fv(glGetUniformLocation(shaderprogram, "material.Emission"), 1, &(material.emission[0]));
 	glBindVertexArray(VAO);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glDrawArrays(GL_TRIANGLES, 0, this->vertices.size());
@@ -137,13 +137,13 @@ void Object::draw(unsigned int shaderprogram) {
 void Object::print() {
 	/*cout << "versize = " << vertices.size() << endl;
 	for (int i = 0; i < vertices.size(); i++)
-		cout << vertices[i].x << "  " << vertices[i].y << "  " << vertices[i].z << endl;
+	cout << vertices[i].x << "  " << vertices[i].y << "  " << vertices[i].z << endl;
 	cout << "tangent: " << endl;
 	for (int i = 0; i < tangent.size(); i++)
-		cout << tangent[i].x << "  " << tangent[i].y << "  " << tangent[i].z << endl;
+	cout << tangent[i].x << "  " << tangent[i].y << "  " << tangent[i].z << endl;
 	cout << "normal: " << endl;
 	for (int i = 0; i < normal.size(); i++)
-		cout << normal[i].x << "  " << normal[i].y << "  " << normal[i].z << endl;*/
+	cout << normal[i].x << "  " << normal[i].y << "  " << normal[i].z << endl;*/
 	cout << this->material.emission.x << "  " << this->material.emission.y << "  " << this->material.emission.z << endl;
 
 }

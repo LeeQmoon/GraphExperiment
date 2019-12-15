@@ -123,8 +123,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\..\..\Desktop\glad.c" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="FollowObject.cpp" />
-    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
